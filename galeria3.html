@@ -1,0 +1,512 @@
+<?php
+/**
+ * SISTEMI I GALERISË ME APROVIM
+ * -----------------------------
+ * 1. Nxënësit ngarkojnë -> Shkon te folderi "ngarkime_pritje"
+ * 2. Mësuesi kontrollon -> I lëviz fotot te folderi "galeria_zyrtare"
+ * 3. Faqja shfaq -> Vetëm fotot nga "galeria_zyrtare"
+ */
+
+// --- KONFIGURIMI ---
+$folderi_pritjes = "ngarkime_pritje/"; // Këtu vijnë fotot e reja
+$folderi_publik = "galeria_zyrtare/";  // Këtu i hidhni ju ato që doni të shfaqen
+
+// Krijojmë folderat automatikisht nëse nuk ekzistojnë në kompjuter
+if (!is_dir($folderi_pritjes)) mkdir($folderi_pritjes, 0777, true);
+if (!is_dir($folderi_publik)) mkdir($folderi_publik, 0777, true);
+
+$mesazh = "";
+$tipi_mesazhit = ""; // Për ngjyrën (jeshile/kuqe)
+
+// --- LOGJIKA E NGARKIMIT (Kur shtypet butoni) ---
+if (isset($_POST['dergo_foto'])) {
+    // Marrja e informacionit të skedarit
+    $emri_file = $_FILES['fotoja']['name'];
+    $tmp_name = $_FILES['fotoja']['tmp_name'];
+    $madhesia = $_FILES['fotoja']['size'];
+
+    // Gjenerojmë një emër unik (që mos të fshihen fotot me emër të njëjtë)
+    // Psh: foto.jpg bëhet -> 17098234_foto.jpg
+    $emri_unik = time() . "_" . basename($emri_file);
+    $destinacioni = $folderi_pritjes . $emri_unik;
+
+    // Marrja e prapashtesës (jpg, png)
+    $shtesa = strtolower(pathinfo($destinacioni, PATHINFO_EXTENSION));
+
+    // Validimi 1: A është foto?
+    if($shtesa == "jpg" || $shtesa == "png" || $shtesa == "jpeg") {
+        // Validimi 2: A është më e vogël se 5MB?
+        if ($madhesia < 5000000) {
+            // PROVOJMË NGARKIMIN
+            if (move_uploaded_file($tmp_name, $destinacioni)) {
+                $mesazh = "✅ Foto u dërgua me sukses! Ajo do të shfaqet pasi të kontrollohet nga mësuesi.";
+                $tipi_mesazhit = "success";
+            } else {
+                $mesazh = "❌ Pati një problem gjatë ngarkimit. Provoni përsëri.";
+                $tipi_mesazhit = "error";
+            }
+        } else {
+            $mesazh = "⚠️ Fotoja është shumë e madhe! (Max 5MB)";
+            $tipi_mesazhit = "error";
+        }
+    } else {
+        $mesazh = "⚠️ Ju lutem ngarkoni vetëm foto (JPG, PNG).";
+        $tipi_mesazhit = "error";
+    }
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<style type="text/css">
+   * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+/* Stilimi i titullit */
+.gallery-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 3rem;
+    
+    /* GRADIENTI I TEKSTIT */
+    background: linear-gradient(90deg, #4f46e5, #ec4899);
+    
+    /* Këto 3 rreshta duhen fiks kështu për të funksionuar */
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent; /* Fallback për browserat e vjetër */
+
+    /* Pozicionimi për vijën dekorative */
+    position: relative;
+    display: table; /* E mban gradientin vetëm te teksti dhe jo në gjithë rreshtin */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* VIJA DEKORATIVE */
+.gallery-title::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 4px;
+    background: linear-gradient(90deg, #4f46e5, #ec4899);
+    border-radius: 2px;
+    
+    /* Animacioni */
+    animation: growWidth 1s ease-out forwards;
+}
+
+@keyframes growWidth {
+    from { width: 0; }
+    to { width: 600px; }
+}
+
+@media (max-width: 480px) {
+    .gallery-title {
+        font-size: 1.8rem; /* E zvogëlojmë pak madhësinë për telefon */
+        padding: 0 20px;   /* I japim pak frymëmarrje anash */
+    }
+}
+/* Rrjeta e fotove (Grid) */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 1 kolonë në mobile */
+    gap: 2.5rem;
+	margin-left:10px;
+}
+
+/* Responsiveti për tableta dhe desktop */
+@media (min-width: 640px) {
+    .photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 kolona */
+    }
+}
+
+@media (min-width: 768px) {
+    .photo-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 kolona */
+    }
+}
+
+/* Stilimi i Kartës */
+.photo-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: transform 0.3s ease; /* Tranzicioni për hover */
+}
+
+/* Efekti Hover (Zmadhimi) */
+.photo-card:hover {
+    transform: scale(1.05);
+}
+
+/* Stilimi i Imazhit */
+.card-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+/* Teksti brenda kartës */
+.card-content {
+    padding: 1rem;
+}
+
+.card-title {
+    font-weight: bold;
+    font-size: 1.125rem;
+}
+
+.card-author {
+    font-size: 0.875rem;
+    color: #4a5568; /* Ngjyra gri-600 */
+}
+/* Stilimi i Lightbox */
+.lightbox {
+    display: none; /* I fshehur fillimisht */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9); /* Sfond i zi i errët */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* Fotoja e zmadhuar */
+.lightbox-content {
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    animation: zoomIn 0.3s ease;
+}
+
+/* Butoni për mbyllje (X) */
+.close-lightbox {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Titulli poshtë fotos */
+#lightbox-caption {
+    color: #ccc;
+    margin-top: 15px;
+    font-size: 1.2rem;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    font-size: 2rem;
+    padding: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+    border-radius: 5px;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.prev-btn { left: 20px; }
+.next-btn { right: 20px; }
+
+/* Fshehim shigjetat në mobile që të mos zënë ekranin */
+@media (max-width: 600px) {
+    .nav-btn { padding: 10px; font-size: 1.5rem; }
+}
+/* Efekti i zbehjes kur ndryshon fotoja */
+.lightbox-content {
+    /* ... kodi ekzistues ... */
+    animation: fadeInImg 0.4s ease-in-out;
+}
+
+@keyframes fadeInImg {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+   .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Header & Navigimi */
+        header {
+            background: #ffffff;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #1a1a1a;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: 0.3s;
+            padding-bottom: 5px;
+        }
+
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+
+        .nav-link.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+ 
+
+</style>
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Deklarojmë variablat në fillim
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+    var lightboxCaption = document.getElementById('lightbox-caption');
+    var images = Array.from(document.querySelectorAll('.card-image'));
+    var currentIndex = 0; // Këtu ruajmë numrin e fotos aktuale
+
+    // 2. Funksioni që ndryshon foton
+    function shfaqFoton(index) {
+        if (index >= images.length) index = 0; // Kthehu te e para
+        if (index < 0) index = images.length - 1; // Shko te e fundit
+        
+        currentIndex = index;
+        var fotojaERe = images[currentIndex];
+        
+        lightboxImg.src = fotojaERe.src;
+        
+        // Përditësojmë titullin
+        var card = fotojaERe.closest('.photo-card');
+        var titulli = card ? card.querySelector('.card-title') : null;
+        if (titulli && lightboxCaption) {
+            lightboxCaption.innerText = titulli.innerText;
+        }
+    }
+
+    // 3. Aktivizojmë klikimin mbi fotot e galerisë
+    images.forEach(function(img, index) {
+        img.onclick = function() {
+            lightbox.style.display = 'flex';
+            shfaqFoton(index);
+        };
+    });
+
+    // 4. Kontrollet e butonave Majtas/Djathtas
+    var btnNext = document.querySelector('.next-btn');
+    var btnPrev = document.querySelector('.prev-btn');
+
+    if (btnNext) {
+        btnNext.onclick = function(e) {
+            e.stopPropagation();
+            shfaqFoton(currentIndex + 1);
+        };
+    }
+
+    if (btnPrev) {
+        btnPrev.onclick = function(e) {
+            e.stopPropagation();
+            shfaqFoton(currentIndex - 1);
+        };
+    }
+
+    // 5. Mbyllja
+    var closeBtn = document.querySelector('.close-lightbox');
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            lightbox.style.display = 'none';
+        };
+    }
+
+    lightbox.onclick = function(e) {
+        if (e.target !== lightboxImg && e.target !== btnNext && e.target !== btnPrev) {
+            lightbox.style.display = 'none';
+        }
+    };
+});
+
+// Kontrolli me tastierë (Shigjetat dhe Esc)
+   
+</script>
+
+<body>
+   <header>
+        <nav class="container">
+            <a href="#" class="logo" onclick="showPage('home')">📸 Klubi i Fotografisë</a>
+            <ul>
+                <li><a href="#" id="nav-home" class="nav-link active" onclick="showPage('home')">Home</a></li>
+                <li><a href="#" id="nav-rreth-nesh" class="nav-link" onclick="showPage('rreth-nesh')">Rreth Nesh</a></li>
+                <li><a href="galeria.html" id="nav-galeria" class="nav-link" >Galeria</a></li>
+                <li><a href="kontakt.html" id="nav-kontakt" class="nav-link" >Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    
+<div class="gallery-title ">
+    <h1 class="gallery-title">Galeria e Punimeve</h1></div>
+    
+    <div class="photo-grid">
+        <div class="photo-card">
+            <img src="suit.jpg" class="card-image">
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+        
+        
+        <div class="photo-card">
+            <img src="suit.jpg" class="card-image">
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+    
+        
+        <div class="photo-card">
+            <img src="https://placehold.co/600x400/a0aec0/ffffff?text=Foto+1" alt="Foto 1" class="card-image">
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+      
+        <div class="photo-card">
+            <img src="https://placehold.co/600x400/a0aec0/ffffff?text=Foto+1" alt="Foto 1" class="card-image">
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+        
+        <div class="photo-card">
+            <img src="https://placehold.co/600x400/a0aec0/ffffff?text=Foto+1" alt="Foto 1" class="card-image">
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+        
+        <div class="photo-card">
+            <img src="https://placehold.co/600x400/a0aec0/ffffff?text=Foto+1" alt="Foto 1" class="card-image">
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+      
+        <div class="photo-card">
+           <div class="gallery-grid">
+            <?php
+                // Marrim fotot vetem nga folderi PUBLIK
+                // GLOB_BRACE lejon kërkimin e disa formateve njëkohësisht
+                $fotot = glob($folderi_publik . "*.{jpg,jpeg,png,gif,JPG,JPEG,PNG}", GLOB_BRACE);
+
+                // Nëse nuk ka foto
+                if (count($fotot) == 0) {
+                    echo '<div class="empty-gallery">
+                            <h3>Galeria është ende bosh! 📂</h3>
+                            <p>Prisni sa mësuesi të aprovojë fotot e para.</p>
+                          </div>';
+                }
+
+                // Cikli për të shfaqur fotot
+                foreach ($fotot as $foto) {
+                    echo '<div class="photo-card">';
+                    // Kujdes: $foto përmban rrugën (galeria_zyrtare/foto1.jpg)
+                    echo '    <img src="' . $foto . '" alt="Foto Nxënësi" loading="lazy">';
+                    echo '</div>';
+                }
+           ?>
+        </div>
+            <div class="card-content">
+                <h3 class="card-title">Titulli i Fotos 1</h3>
+                <p class="card-author">nga Autori 1</p>
+            </div>
+        </div>
+
+     
+        
+</div>
+<div id="lightbox" class="lightbox" onclick="mbyllLightbox(event)">
+    <span class="close-lightbox" onclick="mbyllLightbox(event)">&times;</span>
+    
+    <div class="lightbox-content-wrapper">
+        <img class="lightbox-content" id="lightbox-img">
+        
+        <div class="lightbox-caption">
+            <h3 id="lightbox-title"></h3>
+            <p id="lightbox-author" style="color: #ccc; font-size: 14px; margin-top: 5px;"></p>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

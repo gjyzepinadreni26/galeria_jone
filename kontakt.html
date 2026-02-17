@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klubi i Fotografisë - Projekti Klasa 10</title>
+    <style>
+        /* --- 1. RREGULLAT BAZË (RESET) --- */
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+      .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Header & Navigimi */
+        header {
+            background: #ffffff;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #1a1a1a;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: 0.3s;
+            padding-bottom: 5px;
+        }
+
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+
+        .nav-link.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+ 
+
+        /* --- 3. MENAXHIMI I FAQEVE (DISPLAYS) --- */
+        .page-content {
+            display: none; /* Fshehur si default */
+            padding: 40px 0;
+        }
+
+        .page-content.active {
+            display: block; /* Shfaqet vetëm kur është aktive */
+        }
+
+        /* --- 4. STILIMI I SEKSIONEVE (HERO, CARD) --- */
+        .hero {
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://placehold.co/1200x400/2d3748/ffffff?text=Klubi+i+Fotografise');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 80px 40px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- 5. GRID I GALERISË --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .gallery-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover { transform: scale(1.03); }
+        .gallery-item img { width: 100%; height: 200px; object-fit: cover; }
+        .gallery-info { padding: 15px; }
+
+        /* --- 6. FORMULARI I KONTAKTIT --- */
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #3b82f6;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover { background-color: #2563eb; }
+
+        /* --- 7. FOOTER --- */
+        footer {
+            background-color: #1f2937;
+            color: #9ca3af;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="container">
+            <a href="#" onclick="showPage('home')" class="logo">📸 Klubi i Fotografisë</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" id="nav-home" oclass="nav-link">Home</a></li>
+                <li><a href="" id="nav-rreth-nesh" onclick="showPage('rreth-nesh')" class="nav-link">Rreth Nesh</a></li>
+                <li><a href="galeria.html" id="nav-galeria" onclick="showPage('galeria')" class="nav-link">Galeria</a></li>
+                <li><a href="#" id="nav-kontakt" onclick="showPage('kontakt')" class="nav-link active">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+   <main class="container">
+
+
+        <div id="kontakt-page" >
+            <section class="card">
+                <h1 class="section-title">Na Kontaktoni</h1>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <label>Emri Juaj</label>
+                        <input type="text" placeholder="Emri Mbiemri" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Juaj</label>
+                        <input type="email" placeholder="email@adresa.com" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Mesazhi Juaj</label>
+                        <textarea rows="5" placeholder="Shkruani këtu..." class="form-input"></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Dërgo Mesazhin</button>
+                </form>
+            </section>
+        </div>
+
+   </main>
+
+    <footer>
+        <p>&copy; 2026 Klubi i Fotografisë. Projekti Klasa 10.</p>
+    </footer>
+
+ 
+
+</body>
+</html>
